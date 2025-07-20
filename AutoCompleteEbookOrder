@@ -1,0 +1,22 @@
+/* This snippet is for completing an ebook order so that the order status is marked as 'Completed' automatically. 
+Add this snippet to your Child Theme's functions.php */
+
+add_action('woocommerce_thankyou', 'auto_complete_ebook_orders_by_category');
+function auto_complete_ebook_orders_by_category($order_id) {
+    if (!$order_id) return;
+
+    $order = wc_get_order($order_id);
+    $ebook_found = false;
+
+    foreach ($order->get_items() as $item) {
+        $product = $item->get_product();
+        if (has_term('ebooks', 'product_cat', $product->get_id())) { //Make sure your slug tag of your 'ebook' category matches here! Mine is 'ebooks' and yours may be 'ebook.'
+            $ebook_found = true;
+            break;
+        }
+    }
+
+    if ($ebook_found && $order->has_status('processing')) {
+        $order->update_status('completed');
+    }
+}
